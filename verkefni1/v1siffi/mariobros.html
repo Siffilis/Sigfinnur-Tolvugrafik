@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+uniform vec2 pPosition;
+uniform bool isCoin;
+
+void
+main()
+{
+    gl_Position = vPosition;
+    gl_Position[0] *= 600.0/1000.0;
+
+    if(isCoin){
+        gl_Position[0] += pPosition[0];
+        gl_Position[1] += pPosition[1];
+    }
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+uniform vec4 fColor;
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="./mariofiles/webgl-utils.js.download"></script>
+<script type="text/javascript" src="./mariofiles/initShaders.js.download"></script>
+<script type="text/javascript" src="./mariofiles/MV.js.download"></script>
+<script type="text/javascript" src="./mariofiles/mariobros.js.download"></script>
+
+</head><body>
+<canvas id="gl-canvas" width="1000" height="600">
+
+
+</canvas></body></html>
