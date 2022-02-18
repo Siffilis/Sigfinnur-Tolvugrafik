@@ -2,8 +2,10 @@
 //    Sýnidæmi í Tölvugrafík
 //     Jörðin (sem teningur!) snýst um sólina (stærri teningur!).
 //     Tunglið snýst í kringum jörðina.
+//    Með viðbættu gervitungli sem snýst í kringum Tunglið
+//    Hraði er hægt að hækka og lækka
 //
-//    Hjálmtýr Hafsteinsson, febrúar 2022
+//    Sigfinnur Jerzy Guðlaugsson, febrúar 2022
 /////////////////////////////////////////////////////////////////
 var canvas;
 var gl;
@@ -23,6 +25,8 @@ var rotYear = 0.0;
 var rotDay = 0.0;
 var earthTilt = 23.5;
 var satelliteTilt = 90.0-earthTilt;
+var daySpeed = 1.0;
+var yearSpeed = 0.1;
 
 var matrixLoc;
 
@@ -86,6 +90,19 @@ window.onload = function init()
         }
     } );
 
+    window.addEventListener("keydown", function(e){
+        switch(e.keyCode ){
+            case 38:
+                daySpeed *= 2.0;
+                yearSpeed *= 2.0;
+            break;
+            case 40:
+                daySpeed /= 2.0;
+                yearSpeed /= 2.0;
+            break;
+        }
+    });
+
     render();
 }
 
@@ -143,8 +160,8 @@ function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    rotDay += 1.0;
-    rotYear += 0.1;        // not the correct value, but looks better!
+    rotDay += daySpeed;
+    rotYear += yearSpeed;        // not the correct value, but looks better!
 
     var mv = mat4();
     mv = mult( mv, rotateX(spinX) );
