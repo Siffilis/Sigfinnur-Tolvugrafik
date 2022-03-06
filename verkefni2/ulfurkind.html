@@ -1,0 +1,68 @@
+
+<!-- saved from url=(0061)https://hjalmtyr.github.io/WebGL-forrit/Angel/stereocube.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+
+uniform mat4 projection;
+uniform mat4 modelview;
+
+void main() 
+{
+    gl_Position = projection * modelview * vPosition;
+} 
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+   
+uniform vec4 wireColor;
+
+void
+main()
+{
+    gl_FragColor = wireColor;
+}
+</script>
+
+
+<script type="text/javascript" src="./ulfurkind_files/webgl-utils.js.download"></script>
+<script type="text/javascript" src="./ulfurkind_files/initShaders.js.download"></script>
+<script type="text/javascript" src="./ulfurkind_files/MV.js.download"></script>
+<script type="text/javascript" src="./ulfurkind_files/ulfurkind.js.download"></script>
+
+</head><body>
+    <div>
+        Fjöldi kinda 1<input id="numSheepSlider" type="range" min="1" max="10" step="1" value="1">
+         10
+        </div>
+        <div>
+        Fjöldi úlfa 1<input id="numWolvesSlider" type="range" min="1" max="10" step="1" value="1">
+         10
+        </div>
+        <!--
+        <div>
+        Tími (sek) þar til kindur fæða 5<input id="timeSheepBirthSlider" type="range" min="5.0" max="30.0" step="5.0" value="10.0">
+         30
+        </div>
+        <div>
+        Fjöldi kinda sem úlfur þarf að éta til að fæða 1<input id="wolfRequiredNumSheepSlider" type="range" min="1" max="10" step="1" value="2">
+         10
+        </div>
+        <div>
+        Tími (sek) þar til úlfur sveltir 5<input id="timeWolfStarveSlider" type="range" min="5" max="60" step="5" value="30">
+        60
+        </div>
+        -->
+        <div>
+        Leikhraði 1<input id="simulationSpeedSlider" type="range" min="1" max="5" step="1" value="1">
+        5
+    </div>
+<canvas id="gl-canvas" width="500" height="500">
+   
+<br>
+
+
+
+</canvas></body></html>

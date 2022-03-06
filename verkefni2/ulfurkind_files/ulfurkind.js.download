@@ -1,0 +1,485 @@
+/////////////////////////////////////////////////////////////////
+//    Sýnidæmi í Tölvugrafík
+//     Wíragrindarteningur teiknaður tvisvar frá mismunandi
+//     sjónarhorni til að fá víðsjónaráhrif (með gleraugum)
+//
+//    Hjálmtýr Hafsteinsson, febrúar 2022
+/////////////////////////////////////////////////////////////////
+var canvas;
+var gl;
+
+var NumVertices  = 24;
+//var NumVertCube = 36;
+
+var points = [];
+var colors = [];
+
+var vBuffer;
+var vPosition;
+
+var movement = false;     // Do we rotate?
+var spinX = 0;
+var spinY = 0;
+var origX;
+var origY;
+
+var zDist = -3.0;
+var eyesep = 0.2;
+
+var proLoc;
+var mvLoc;
+
+// Misc
+var frame = 0;
+
+// Objects
+var leikGrid;
+var kindur = [];
+var ulfar = [];
+
+// Stillanlegir parameters
+var numSheep = 1;
+var numWolves = 1;
+var timeSheepBirth = 10.0;
+var wolfRequiredNumSheep = 3;
+var timeWolfStarve = 30.0;
+var simulationSpeed = 1;
+
+var nGrid = 5.0;
+
+//var reiknaSpeed()
+
+class Grid{
+    constructor(){
+        this.grid =[[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]];
+    }
+    // 0 = tómt
+    // 1 = kind
+    // 2 = úlfur
+    // 3 = bæði
+    setCell(X,Y,Z,statusid){
+        this.grid[X][Y][Z] += statusid;
+    }
+    getCell(X,Y,Z){
+        return this.grid[X][Y][Z];
+    }
+    emptyGrid(){
+        this.grid =[[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                    [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]];
+    }
+}
+
+class Kind{
+    constructor(X, Y, Z){
+        this.x = X;
+        this.y = Y;
+        this.z = Z;
+        leikGrid.setCell[this.x, this.y, this.z];
+    }
+}
+
+class Ulfur{
+    constructor(X, Y, Z){
+        this.x = X;
+        this.y = Y;
+        this.z = Z;
+        leikGrid.setCell[this.x, this.y, this.z];
+    }
+}
+
+function randomIntFromInterval(min, max) { // min and max included 
+    return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+function moveKind(kind){
+    var r = randomIntFromInterval(1,6);
+    var isFleeing = false;
+    if(isFleeing){
+        var abc = 1.0;
+    }
+    else{
+        switch(r){
+            case 1:
+                if(kind.x == 4.0){
+                    kind.x = 0.0;
+                }
+                else
+                    kind.x += 1.0;
+                break;
+            case 2:
+                if(kind.x == 0.0){
+                    kind.x = 4.0;
+                }
+                else
+                    kind.x -= 1.0;
+                break;
+            case 3:
+                if(kind.y == 4.0){
+                    kind.y = 0.0;
+                }
+                else
+                    kind.y += 1.0;
+                break;
+            case 4:
+                if(kind.y == 0.0){
+                    kind.y = 4.0;
+                }
+                else
+                    kind.y -= 1.0;
+                break;
+            case 5:
+                if(kind.z == 4.0){
+                    kind.z = 0.0;
+                }
+                else
+                    kind.z += 1.0;
+                break;
+            case 6:
+                if(kind.z == 0.0){
+                    kind.z = 4.0;
+                }
+                else
+                    kind.z -= 1.0;
+                break;
+        }
+    }
+}
+
+function moveUlfur(ulfur){
+    var r = randomIntFromInterval(1,6);
+    var isChasing = false;
+    if(isChasing){
+        var abc = 1.0;
+    }
+    else{
+        switch(r){
+            case 1:
+                if(ulfur.x == 4.0){
+                    ulfur.x = 0.0;
+                }
+                else
+                    ulfur.x += 1.0;
+                break;
+            case 2:
+                if(ulfur.x == 0.0){
+                    ulfur.x = 4.0;
+                }
+                else
+                    ulfur.x -= 1.0;
+                break;
+            case 3:
+                if(ulfur.y == 4.0){
+                    ulfur.y = 0.0;
+                }
+                else
+                    ulfur.y += 1.0;
+                break;
+            case 4:
+                if(ulfur.y == 0.0){
+                    ulfur.y = 4.0;
+                }
+                else
+                    ulfur.y -= 1.0;
+                break;
+            case 5:
+                if(ulfur.z == 4.0){
+                    ulfur.z = 0.0;
+                }
+                else
+                    ulfur.z += 1.0;
+                break;
+            case 6:
+                if(ulfur.z == 0.0){
+                    ulfur.z = 4.0;
+                }
+                else
+                    ulfur.z -= 1.0;
+                break;
+        }
+    }
+}
+
+function boolGrid(){ //frumstillir staðsetningu á punktum í "grid"
+    var grid = [[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+                [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]];
+    return grid;
+}
+
+bGrid = boolGrid();
+
+function colorCube()
+{
+    quad( 1, 0, 3, 2 );
+    quad( 2, 3, 7, 6 );
+    quad( 3, 0, 4, 7 );
+    quad( 6, 5, 1, 2 );
+    quad( 4, 5, 6, 7 );
+    quad( 5, 4, 0, 1 );
+}
+
+function quad(a, b, c, d) 
+{
+    var vertices = [
+        vec3( -0.5, -0.5,  0.5 ),
+        vec3( -0.5,  0.5,  0.5 ),
+        vec3(  0.5,  0.5,  0.5 ),
+        vec3(  0.5, -0.5,  0.5 ),
+        vec3( -0.5, -0.5, -0.5 ),
+        vec3( -0.5,  0.5, -0.5 ),
+        vec3(  0.5,  0.5, -0.5 ),
+        vec3(  0.5, -0.5, -0.5 )
+    ];
+
+    var vertexColors = [
+        [ 0.0, 0.0, 0.0, 1.0 ],  // black
+        [ 1.0, 0.0, 0.0, 1.0 ],  // red
+        [ 1.0, 1.0, 0.0, 1.0 ],  // yellow
+        [ 0.0, 1.0, 0.0, 1.0 ],  // green
+        [ 0.0, 0.0, 1.0, 1.0 ],  // blue
+        [ 1.0, 0.0, 1.0, 1.0 ],  // magenta
+        [ 0.0, 1.0, 1.0, 1.0 ],  // cyan
+        [ 1.0, 1.0, 1.0, 1.0 ]   // white
+    ];
+
+    // We need to partition the quad into two triangles in order for
+    // WebGL to be able to render it.  In this case, we create two
+    // triangles from the quad indices
+    
+    //vertex color assigned by the index of the vertex
+    
+    var indices = [ a, b, c, a, c, d ];
+
+    for ( var i = 0; i < indices.length; ++i ) {
+        points.push( vertices[indices[i]] );
+        //colors.push( vertexColors[indices[i]] );
+    
+        // for solid colored faces use 
+        colors.push(vertexColors[a]);
+        
+    }
+}
+
+// the 8 vertices of the cube
+var v = [
+    vec3( -0.5, -0.5,  0.5 ),
+    vec3( -0.5,  0.5,  0.5 ),
+    vec3(  0.5,  0.5,  0.5 ),
+    vec3(  0.5, -0.5,  0.5 ),
+    vec3( -0.5, -0.5, -0.5 ),
+    vec3( -0.5,  0.5, -0.5 ),
+    vec3(  0.5,  0.5, -0.5 ),
+    vec3(  0.5, -0.5, -0.5 )
+];
+
+var lines = [ v[0], v[1], v[1], v[2], v[2], v[3], v[3], v[0],
+              v[4], v[5], v[5], v[6], v[6], v[7], v[7], v[4],
+              v[0], v[4], v[1], v[5], v[2], v[6], v[3], v[7]
+            ];
+
+window.onload = function init()
+{
+    canvas = document.getElementById( "gl-canvas" );
+    
+    gl = WebGLUtils.setupWebGL( canvas );
+    if ( !gl ) { alert( "WebGL isn't available" ); }
+
+    colorCube();
+    leikGrid = new Grid();
+    kindur.push(new Kind(0.0,0.0,0.0));
+    ulfar.push(new Ulfur(4.0,4.0,4.0));
+
+    gl.viewport( 0, 0, canvas.width, canvas.height );
+    gl.clearColor( 47/255,79/255,79/255, 1.0 );
+    
+    gl.enable(gl.DEPTH_TEST);
+
+    //
+    //  Load shaders and initialize attribute buffers
+    //
+    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram( program );
+    
+    vBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, (24 + 36)*12, gl.STATIC_DRAW );
+
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(lines));
+    gl.bufferSubData(gl.ARRAY_BUFFER, NumVertices*12, flatten(points));
+
+    vPosition = gl.getAttribLocation( program, "vPosition" );
+    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vPosition );
+
+    colorLoc = gl.getUniformLocation( program, "wireColor" );
+    
+    proLoc = gl.getUniformLocation( program, "projection" );
+    mvLoc = gl.getUniformLocation( program, "modelview" );
+
+    var proj = perspective( 50.0, 1.0, 0.2, 100.0 );
+    gl.uniformMatrix4fv(proLoc, false, flatten(proj));
+    
+    //event listeners for mouse
+    canvas.addEventListener("mousedown", function(e){
+        movement = true;
+        origX = e.offsetX;
+        origY = e.offsetY;
+        e.preventDefault();         // Disable drag and drop
+    } );
+
+    canvas.addEventListener("mouseup", function(e){
+        movement = false;
+    } );
+
+    canvas.addEventListener("mousemove", function(e){
+        if(movement) {
+    	    spinY = ( spinY + (origX - e.offsetX) ) % 360;
+            spinX = ( spinX + (e.offsetY - origY) ) % 360;
+            origX = e.offsetX;
+            origY = e.offsetY;
+        }
+    } );
+    
+    // Event listener for keyboard
+     window.addEventListener("keydown", function(e){
+         switch( e.keyCode ) {
+            case 38:	// upp ör
+                zDist += 0.1;
+                break;
+            case 40:	// niður ör
+                zDist -= 0.1;
+                break;
+         }
+     }  );  
+
+    // Event listener for mousewheel
+     window.addEventListener("mousewheel", function(e){
+         if( e.wheelDelta > 0.0 ) {
+             zDist += 0.1;
+         } else {
+             zDist -= 0.1;
+         }
+     }  );  
+
+    document.getElementById("numSheepSlider").onchange = function(event) {
+        numSheep = parseInt(event.target.value);
+        k = kindur.length;
+        if(numSheep > k){
+            for(i = 0; i <= numSheep - k; i++){
+                kindur.push(new Kind(0.0,0.0,0.0));
+            }
+        }
+        else{
+            for(i = 0; i < k - numSheep; i++){
+                var abc1= kindur.pop();
+            }
+        }
+    };
+    document.getElementById("numWolvesSlider").onchange = function(event) {
+        numWolves = parseInt(event.target.value);
+        u = ulfar.length;
+
+        if(numWolves > u){
+            for(i = 0; i <= numWolves - u; i++){
+                ulfar.push(new Ulfur(4.0,4.0,4.0));
+            }
+        }
+        else{
+            for(i = 0; i < u - numWolves; i++){
+                var abc1= ulfar.pop();
+            }
+        }
+    };
+    /*
+    document.getElementById("timeSheepBirthSlider").onchange = function(event) {
+        timeSheepBirth = parseFloat(event.target.value);
+    };
+    document.getElementById("wolfRequiredNumSheepSlider").onchange = function(event) {
+        wolfRequiredNumSheep = parseFloat(event.target.value);
+    };
+    document.getElementById("timeWolfStarveSlider").onchange = function(event) {
+        timeWolfStarve = parseFloat(event.target.value);
+    };
+    */
+    document.getElementById("simulationSpeedSlider").onchange = function(event) {
+        simulationSpeed = parseFloat(event.target.value);
+    };
+
+    render();
+}
+
+function drawCubeBlack(ulfur){
+    var mv = lookAt( vec3(0.0, 0.0, zDist),
+    vec3(0.0, 0.0, zDist+2.0),
+    vec3(0.0, 1.0, 0.0) );
+    mv = mult( mv, mult( rotateX(spinX), rotateY(spinY) ) );
+
+    mv2 = mult( mv, translate((ulfur.x/nGrid)-0.5+(0.5*(1/nGrid)),(ulfur.y/nGrid)-0.5+(0.5*(1/nGrid)),(ulfur.z/nGrid)-0.5+(0.5*(1/nGrid))));    
+    mv2 = mult( mv2, scalem(1/nGrid, 1/nGrid, 1/nGrid));
+    gl.uniform4fv( colorLoc, vec4(0.0, 0.0, 0.0, 1.0) );
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv2));
+    gl.drawArrays( gl.TRIANGLES, NumVertices, 36);
+}
+
+function drawCubeWhite(kind){
+    var mv = lookAt( vec3(0.0, 0.0, zDist),
+    vec3(0.0, 0.0, zDist+2.0),
+    vec3(0.0, 1.0, 0.0) );
+    mv = mult( mv, mult( rotateX(spinX), rotateY(spinY) ) );
+
+    mv2 = mult( mv, translate((kind.x/nGrid)-0.5+(0.5*(1/nGrid)),(kind.y/nGrid)-0.5+(0.5*(1/nGrid)),(kind.z/nGrid)-0.5+(0.5*(1/nGrid))));    
+    mv2 = mult( mv2, scalem(1/nGrid, 1/nGrid, 1/nGrid));
+    gl.uniform4fv( colorLoc, vec4(1.0, 1.0, 1.0, 1.0) );
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv2));
+    gl.drawArrays( gl.TRIANGLES, NumVertices, 36);
+}
+
+function render()
+{
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    //alert(60 % 60.0/simulationSpeed);
+    frame = (frame + 1)%(60.0/simulationSpeed);
+
+    var mv = lookAt( vec3(0.0, 0.0, zDist),
+                      vec3(0.0, 0.0, zDist+2.0),
+                      vec3(0.0, 1.0, 0.0) );
+    mv = mult( mv, mult( rotateX(spinX), rotateY(spinY) ) );
+
+    gl.uniform4fv( colorLoc, vec4(0.0, 1.0, 0.0, 1.0) );
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
+    gl.drawArrays( gl.LINES, 0, NumVertices );
+
+    kindur.forEach(element => {
+        if(frame == ((60.0/simulationSpeed) - 1)){
+            leikGrid.emptyGrid();
+            moveKind(element);
+            leikGrid.setCell(element.x,element.y,element.z,1);
+        }
+        drawCubeWhite(element);
+    });
+
+    ulfar.forEach(element => {
+        if(frame == ((60.0/simulationSpeed) - 1)){
+            //leikGrid.emptyGrid();
+            moveUlfur(element);
+            leikGrid.setCell(element.x,element.y,element.z,2);
+            if(leikGrid.getCell(element.x,element.y,element.z) == 3){
+                var abc1 = kindur.pop();
+            }
+        }
+        drawCubeBlack(element);
+    });
+    
+
+    requestAnimFrame( render );
+}
+
