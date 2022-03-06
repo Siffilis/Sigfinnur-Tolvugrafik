@@ -1,9 +1,10 @@
 /////////////////////////////////////////////////////////////////
-//    Sýnidæmi í Tölvugrafík
-//     Wíragrindarteningur teiknaður tvisvar frá mismunandi
-//     sjónarhorni til að fá víðsjónaráhrif (með gleraugum)
+//    Verkefni 2 í tölvugrafík
+//    Hermun á kindum og úlfum.
+//    Úlfarnir elta kindurnar og éta þær, hægt er
+//    að stilla hermunina.
 //
-//    Hjálmtýr Hafsteinsson, febrúar 2022
+//    Sigfinnur Jerzy Guðlaugsson, febrúar 2022
 /////////////////////////////////////////////////////////////////
 var canvas;
 var gl;
