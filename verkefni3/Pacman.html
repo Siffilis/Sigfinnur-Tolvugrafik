@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<!-- saved from url=(0071)https://hjalmtyr.github.io/WebGL-forrit/ThreeJS/05-cube-ball-plane.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<title>Tengingur, kúla og slétta</title> 
+	</head>
+	<body>
+        <canvas id="c" width="800" height="800"></canvas>
+		<script src="./Pacman_files/three.js"></script>
+        <script src="./Pacman_files/OrbitControls.js"></script>
+		<script>
+
+            var xDeltaBall = 0;
+            var zDeltaBall = 0;
+            const ballGeometry = new THREE.SphereGeometry( 0.5, 20, 20 );
+		    const ballMaterial = new THREE.MeshPhongMaterial( { color: 0xFFFF00 } );
+			const ball = new THREE.Mesh( ballGeometry, ballMaterial );
+            var litlirballs = [];
+            var draugar = [];
+
+            // Ná í striga
+            const canvas = document.querySelector('#c');
+            
+            
+            // Skilgreina sviðsnet
+			const scene = new THREE.Scene();
+            scene.background = new THREE.Color('black');
+            
+            // Skilgreina myndavél og staðsetja hana
+			const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
+			camera.position.set(20, 20, 0);
+
+            // Bæta við músarstýringu
+            const controls = new THREE.OrbitControls( camera, canvas );
+
+            // Skilgreina birtingaraðferð með afbjögun (antialias)
+			const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+
+
+            // Búa til tening með Phong áferð (Phong material) og bæta í sviðsnetið
+            const teiknakubb = function(i,j){
+			    const geometry = new THREE.BoxGeometry();
+			    const material = new THREE.MeshPhongMaterial( { color: 0x44aa88 } );
+			    const cube = new THREE.Mesh( geometry, material );
+                cube.position.x = i - 9.5;
+                cube.position.z = j - 9.0;
+                //cube.position.z = j;
+			    scene.add( cube );
+            }
+
+            var gameMatrix = [
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+                [1,0,1,1,1,0,1,0,0,0,0,0,1,0,1,1,1,0,1],
+                [1,0,1,1,1,0,1,0,0,0,0,0,1,0,1,1,1,0,1],
+                [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
+                [1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1],
+                [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
+                [1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1,0,1],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,0,1,1,0,1,1,0,1,0,1,0,1,1,0,1,1,0,1],
+                [1,0,1,1,0,1,1,0,1,0,1,0,1,1,0,1,1,0,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [1,0,1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,1],
+                [1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1],
+                [1,0,1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            ];
+
+            var kulaStadsetning = gameMatrix[10][9];
+
+            const drawMatrix = function(){
+                for(i = 0; i < gameMatrix.length; i++){
+                    for(j = 0; j < gameMatrix.length; j++){
+                        if(gameMatrix[i][j] == 1){
+                            teiknakubb(i,j);
+                        }
+                    }
+                }
+            }
+
+            //stadsetjaKulu()
+
+            const teiknaKulu = function(i,j){
+			    //const ballGeometry = new THREE.SphereGeometry( 0.5, 20, 20 );
+			    //const ballMaterial = new THREE.MeshPhongMaterial( { color: 0xFFFF00 } );
+			    //const ball = new THREE.Mesh( ballGeometry, ballMaterial );
+                ball.position.x = i+0.5;
+                ball.position.z = -j;
+			    scene.add( ball );
+            }
+
+            const createColor = function(){
+                r = Math.random();
+                
+            }
+
+            //teiknadrauga
+            const buatilDraug = function(i,j){
+			    const geometry = new THREE.CylinderGeometry( 0.5, 0.5, 1, 20 );
+                const material = new THREE.MeshPhongMaterial( {color: 0xFF0000} );
+                const cylinder = new THREE.Mesh( geometry, material );
+                cylinder.position.x = i-9.5;
+                cylinder.position.z = j-9.0;
+                draugar.push(cylinder);
+            }
+
+            const initDraugar = function(){
+                buatilDraug(4,7);
+                buatilDraug(4,11);
+                buatilDraug(3,7);
+                buatilDraug(3,11);
+                draugar.forEach(element => {
+                    scene.add(element);
+                });
+            }
+
+
+            // LÍTIL KÚLA
+            const buaTilLitlaKulu = function(i,j){
+                const ballGeometry = new THREE.SphereGeometry( 0.1, 4, 2 );
+                const ballMaterial = new THREE.MeshPhongMaterial( { color: 0xFFFF00 } );
+                const smallball = new THREE.Mesh( ballGeometry, ballMaterial );
+                /*
+                for (let i = 0; i < litlirballs.length; i++) {
+                    for (let j = 0; j < litlirballs.length; j++) {
+                        if(gameMatrix[i][j] != 1){
+                            const ballGeometry = new THREE.SphereGeometry( 0.1, 4, 2 );
+                            const ballMaterial = new THREE.MeshPhongMaterial( { color: 0xFFFF00 } );
+                            const smallball = new THREE.Mesh( ballGeometry, ballMaterial );
+                            scene.add(smallball);
+                        }
+                    }
+                }
+                */
+                smallball.position.x = i-9.5;
+                smallball.position.z = j-9.0;
+                litlirballs.push(smallball);
+            }
+
+            const initSmallBalls = function(){
+                for(i = 0; i < gameMatrix.length; i++){
+                    for(j = 0; j < gameMatrix.length; j++){
+                        if(gameMatrix[i][j] == 0 && i > 0 && i <= 18){
+                            buaTilLitlaKulu(i,j);
+                        }
+                    }
+                }
+            }
+
+            const teiknaLitlarKulur = function(){
+                litlirballs.forEach(element => {
+                    scene.add(element);
+                });
+            }
+
+            const stadsetjaKulu = function(i,j){
+                scene.remove(ball);
+                teiknaKulu(i,j);
+                kulaStadsetning = gameMatrix[10+i][9+j];
+                //alert("x: " + ball.position.x + " y: " + ball.position.y);
+            }
+
+            window.addEventListener("keydown", function(e){
+                switch( e.keyCode ) {
+                    case 38:	// upp ör
+                        if(gameMatrix[10+xDeltaBall-1][9+zDeltaBall] != 1){
+                            xDeltaBall--;
+                            stadsetjaKulu(xDeltaBall, zDeltaBall);
+                        }
+                        //alert("Er veggur næst: "+gameMatrix[10+xDeltaBall-1][9+zDeltaBall+1] + " Hnit: " + "("+(10+xDeltaBall)+","+(9+zDeltaBall)+")");
+                        break;
+                    case 40:	// niður ör
+                        if(gameMatrix[10+xDeltaBall+1][9+zDeltaBall] != 1){
+                            xDeltaBall++;
+                            stadsetjaKulu(xDeltaBall, zDeltaBall);
+                        }
+                        //alert("Er veggur næst: "+gameMatrix[10+xDeltaBall+1][9+zDeltaBall] + " Hnit: " + "("+(10+xDeltaBall)+","+(9+zDeltaBall)+")");
+                        break;
+                    case 37:    // vinstri ör
+                        if(gameMatrix[10+xDeltaBall][9+zDeltaBall-1] != 1){
+                            zDeltaBall--;
+                            stadsetjaKulu(xDeltaBall, zDeltaBall);
+                        }
+                        //alert("Er veggur næst: "+gameMatrix[10+xDeltaBall][9+zDeltaBall-1] + " Hnit: " + "("+(10+xDeltaBall)+","+(9+zDeltaBall)+")");
+                        break;
+                    case 39:    // hægri ör
+                        if(gameMatrix[10+xDeltaBall][9+zDeltaBall+1] != 1){
+                            zDeltaBall++;
+                            stadsetjaKulu(xDeltaBall, zDeltaBall);
+                        }
+                        //alert("Er veggur næst: "+gameMatrix[10+xDeltaBall][9+zDeltaBall+1] + " Hnit: " + "("+(10+xDeltaBall)+","+(9+zDeltaBall)+")");
+                        break;
+                }
+            });
+
+            //teiknaKulu(0, 0);
+            stadsetjaKulu(0,0);
+            //teiknalitlaKulu(0,0);
+            initSmallBalls();
+            teiknaLitlarKulur();
+            initDraugar();
+
+            // Búa til sléttu með Phong áferð
+            const planeGeometry = new THREE.PlaneGeometry( 20, 19 );
+            const planeMaterial = new THREE.MeshPhongMaterial( { color: 0xcccccc } );
+            const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.set(0, -0.5, 0);
+            scene.add( plane );
+            
+            
+            // Skilgreina ljósgjafa og bæta honum í sviðsnetið
+            const light = new THREE.DirectionalLight(0xFFFFFF, 1);
+            light.position.set(2, 4, 1);
+            scene.add(light);
+
+            // Hreyfifall
+			const animate = function () {
+				requestAnimationFrame( animate );
+
+                controls.update();
+				renderer.render( scene, camera );
+			};
+
+            drawMatrix();
+            //teiknakubb(15, 2);
+
+			animate();
+		</script>
+	
+</body></html>
